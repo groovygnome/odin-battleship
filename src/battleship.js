@@ -1,8 +1,7 @@
 export function createBattleship(length) {
     let hits = 0;
     let sunk = false;
-    let startCoords = [];
-    let endCoords = [];
+
 
     function hit() {
         hits++;
@@ -13,15 +12,11 @@ export function createBattleship(length) {
         return false;
     }
 
-    function setStart(x, y) {
-        startCoords.push(x);
-        startCoords.push(y);
+
+
+    function getLength() {
+        return length;
     }
 
-    function setEnd(x, y) {
-        endCoords.push(x);
-        endCoords.push(y);
-    }
-
-    return { hit, isSunk, setStart, setEnd };
+    return { hit, isSunk, getLength };
 }
