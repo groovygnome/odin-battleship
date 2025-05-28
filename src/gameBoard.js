@@ -12,7 +12,6 @@ export function createGameboard() {
     let sunk = 0;
 
     function placeShip(ship, startCoordinates, endCoordinates) {
-        // if(startCoordinates[0] < 0 || startCoordinates[1] < 0 || endCoordinates [0] < 0 || endCoordinates[1] < 0)
         let length = ship.getLength();
         let i;
         let j;
