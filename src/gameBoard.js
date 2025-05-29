@@ -8,7 +8,7 @@ export function createGameboard() {
     let destroyer = createBattleship(2);
 
     let occupied = [];
-    let misses = 0;
+    let missed = [];
     let sunk = 0;
 
     function placeShip(ship, startCoordinates, endCoordinates) {
@@ -49,9 +49,17 @@ export function createGameboard() {
             if (ship.isSunk()) sunk++;
             if (sunk === 5) console.log('All ships sunk :(');
         } else {
-            misses++;
+            missed.push(coordinates);
         }
     }
 
-    return { receiveAttack, placeShip };
+    function getOccupied() {
+        return occupied;
+    }
+
+    function getMissed() {
+        return missed;
+    }
+
+    return { receiveAttack, placeShip, getOccupied, getMissed };
 }

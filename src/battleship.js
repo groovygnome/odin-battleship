@@ -2,7 +2,6 @@ export function createBattleship(length) {
     let hits = 0;
     let sunk = false;
 
-
     function hit() {
         hits++;
     }
@@ -11,8 +10,6 @@ export function createBattleship(length) {
         if (hits === length) return true;
         return false;
     }
-
-
 
     function getLength() {
         return length;

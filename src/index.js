@@ -1,4 +1,4 @@
-import { createPlayer } from './player'
+import { createGameDirector } from './gameDirector.js'
 import './styles.css'
 
 const dom = (() => {
@@ -22,7 +22,7 @@ const dom = (() => {
             boardRow.className = 'row';
             boardRow.id = 'row' + i;
             for (let j = 0; j < 10; j++) {
-                let tile = document.createElement('div');
+                let tile = document.createElement('button');
                 tile.textContent = tiles[j][i];
                 tile.id = j.toString() + i;
                 boardRow.appendChild(tile);
@@ -36,3 +36,6 @@ const dom = (() => {
     }
     displayBoard();
 })();
+
+let director = createGameDirector();
+director.init();
