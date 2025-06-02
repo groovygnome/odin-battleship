@@ -1,9 +1,9 @@
-import { createGameboard } from './gameBoard.js'
+import { createGameBoard } from './gameBoard.js'
 import { createBattleship } from './battleship.js'
 import { pubsub } from './pubsub.js'
 
 export function createPlayer(name) {
-    let gameBoard = createGameboard();
+    let gameBoard = createGameBoard();
     let enemyName = null;
     let ships = [];
     ships.push(createBattleship(5), createBattleship(4), createBattleship(3), createBattleship(3), createBattleship(2));
@@ -40,7 +40,7 @@ export function createPlayer(name) {
                 console.log(`${num} : ${coordinate}`)
                 num++;
             })
-            let index = prompt(`Select a coordinate.`);
+            let index = Number(prompt(`Select a coordinate.`));
             index--;
             let endCoordinate = endCoordinates[index];
             gameBoard.placeShip(ship, startCoordinate, endCoordinate);
@@ -49,13 +49,24 @@ export function createPlayer(name) {
 
     }
 
-    return { setEnemyName, sendAttack, placeShips }
+    function isAlive() {
+        if (gameBoard.getSunk() < 5) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    function getName() { return name; }
+
+
+    return { setEnemyName, sendAttack, placeShips, getName }
 
 
 }
 
 export function createCPUPlayer() {
-    let gameBoard = createGameboard();
+    let gameBoard = createGameBoard();
     let enemyName = null;
     let ships = [];
     ships.push(createBattleship(5), createBattleship(4), createBattleship(3), createBattleship(3), createBattleship(2));
@@ -96,7 +107,18 @@ export function createCPUPlayer() {
 
     }
 
-    return { setEnemyName, sendAttack, placeShips }
+    function isAlive() {
+        if (gameBoard.getSunk() < 5) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
+    function getName() { return 'CPU'; }
+
+    return { setEnemyName, sendAttack, placeShips, isAlive, getName }
 
 
 }

@@ -1,12 +1,6 @@
 import { createBattleship } from './battleship.js'
 
-export function createGameboard() {
-    let carrier = createBattleship(5);
-    let battleship = createBattleship(4);
-    let cruiser = createBattleship(3);
-    let submarine = createBattleship(3);
-    let destroyer = createBattleship(2);
-
+export function createGameBoard() {
     let occupied = [];
     let missed = [];
     let sunk = 0;
@@ -28,8 +22,8 @@ export function createGameboard() {
         if (Math.abs(diff) === length - 1) {
             while (diff != 0) {
                 let occupiedEntry = i === 0
-                    ? [[startCoordinates[i], startCoordinates[j - diff]], ship]
-                    : [[startCoordinates[j], startCoordinates[i - diff]], ship];
+                    ? [[startCoordinates[i], startCoordinates[j] - diff], ship]
+                    : [[startCoordinates[j] - diff, startCoordinates[i]], ship];
                 occupied.push(occupiedEntry);
                 diff = diff > 0 ? diff - 1 : diff + 1;
             }
@@ -61,5 +55,9 @@ export function createGameboard() {
         return missed;
     }
 
-    return { receiveAttack, placeShip, getOccupied, getMissed };
+    function getSunk() {
+        return sunk;
+    }
+
+    return { receiveAttack, placeShip, getOccupied, getMissed, getSunk };
 }
