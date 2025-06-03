@@ -35,7 +35,8 @@ export function createGameBoard() {
     }
 
     function receiveAttack(coordinates) {
-        let space = occupied.findIndex(entry => entry[0] === coordinates);
+        let space = occupied.findIndex(entry => entry[0].toString() === coordinates.toString());
+
         if (space != -1) {
             let ship = occupied[space][1];
             ship.hit();

@@ -24,23 +24,21 @@ export function createPlayer(name) {
 
     function placeShips() {
         ships.forEach((ship) => {
-            console.log(`Please place a ship of size ${ship.getLength()}`);
-            const startCoordinateX = Number(prompt(`Enter the X coordinate of the starting position`));
-            const startCoordinateY = Number(prompt(`Enter the Y coordinate of the starting position`));
+            let promptStart = `You are placing a ship of size ${ship.getLength()}.`
+            const startCoordinateX = Number(prompt(`${promptStart}\nEnter the X coordinate of the starting position.`));
+            const startCoordinateY = Number(prompt(`${promptStart}\nEnter the Y coordinate of the starting position.`));
             let startCoordinate = [startCoordinateX, startCoordinateY];
             let diff = ship.getLength() - 1;
 
             let endCoordinates = [[startCoordinateX - diff, startCoordinateY], [startCoordinateX + diff, startCoordinateY], [startCoordinateX, startCoordinateY - diff], [startCoordinateX, startCoordinateY + diff]];
-            console.log(endCoordinates);
             endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9));
-            console.log(endCoordinates);
-            console.log(`Select from these coordinates, these are where your ship can be placed to.`);
+            let selectPrompt = `Select from these coordinates, these are where your ship can be placed to.`;
             let num = 1;
             endCoordinates.forEach((coordinate) => {
-                console.log(`${num} : ${coordinate}`)
+                selectPrompt += `\n${num} : ${coordinate}`;
                 num++;
-            })
-            let index = Number(prompt(`Select a coordinate.`));
+            });
+            let index = Number(prompt(selectPrompt));
             index--;
             let endCoordinate = endCoordinates[index];
             gameBoard.placeShip(ship, startCoordinate, endCoordinate);
@@ -59,8 +57,12 @@ export function createPlayer(name) {
 
     function getName() { return name; }
 
+    function getBoard() {
+        return gameBoard; //temporary delete this later
+    }
 
-    return { setEnemyName, sendAttack, placeShips, getName }
+
+    return { setEnemyName, sendAttack, placeShips, isAlive, getName, getBoard }
 
 
 }

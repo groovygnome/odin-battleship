@@ -1,0 +1,29 @@
+/**
+* @jest-environment jsdom
+*/
+
+import { createPlayer } from '../player.js'
+
+let testPlayer = createPlayer('test');
+const inputs = ['0', '0', '1', '0', '9', '1', '9', '0', '1', '9', '9', '1', '4', '4', '1'];
+jest.spyOn(window, 'prompt').mockImplementation(() => {
+    return inputs.shift();
+});
+
+
+testPlayer.placeShips();
+let playerBoard = testPlayer.getBoard();
+
+
+test('receive attacks properly', () => {
+    testPlayer.setEnemyName('test');
+    testPlayer.sendAttack([0, 0]);
+});
+
+test('receive attacks properly', () => {
+    testPlayer.setEnemyName('test');
+    let occupied = playerBoard.getOccupied();
+    occupied.forEach(entry => { testPlayer.sendAttack(entry[0]); console.log(entry); });
+    console.log(playerBoard.getOccupied());
+});
+

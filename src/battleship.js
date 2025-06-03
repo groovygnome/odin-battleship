@@ -15,5 +15,7 @@ export function createBattleship(length) {
         return length;
     }
 
-    return { hit, isSunk, getLength };
+    function getHits() { return hits; }
+
+    return { hit, isSunk, getLength, getHits };
 }
