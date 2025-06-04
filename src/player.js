@@ -57,12 +57,12 @@ export function createPlayer(name) {
 
     function getName() { return name; }
 
-    function getBoard() {
-        return gameBoard; //temporary delete this later
-    }
+    //function getBoard() {
+    //    return gameBoard; //temporary delete this later
+    //}
 
 
-    return { setEnemyName, sendAttack, placeShips, isAlive, getName, getBoard }
+    return { setEnemyName, sendAttack, placeShips, isAlive, getName }
 
 
 }
@@ -117,6 +117,7 @@ export function createCPUPlayer() {
         }
     }
 
+    //function getBoard() { return gameBoard; } //testing only delete laterrrrrrrr
 
     function getName() { return 'CPU'; }
 
