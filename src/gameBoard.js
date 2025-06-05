@@ -1,5 +1,3 @@
-import { createBattleship } from './battleship.js'
-
 export function createGameBoard() {
     let occupied = [];
     let missed = [];
@@ -43,8 +41,10 @@ export function createGameBoard() {
             occupied.splice(space, 1);
             if (ship.isSunk()) sunk++;
             if (sunk === 5) console.log('All ships sunk :(');
+            return true;
         } else {
             missed.push(coordinates);
+            return false;
         }
     }
 

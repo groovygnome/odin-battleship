@@ -2,3 +2,7 @@
     display: grid;
     grid-template-columns: repeat(10, 1fr);
 }
+
+.board{
+    margin-bottom: 10px;
+}

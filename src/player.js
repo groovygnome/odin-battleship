@@ -3,15 +3,23 @@ import { createBattleship } from './battleship.js'
 import { pubsub } from './pubsub.js'
 
 export function createPlayer(name) {
-    let gameBoard = createGameBoard();
+    let occupied = [];
+    let sunk = 0;
     let enemyName = null;
     let ships = [];
+    let defendSpaces = [];
+    let attackSpaces = [];
     ships.push(createBattleship(5), createBattleship(4), createBattleship(3), createBattleship(3), createBattleship(2));
 
     pubsub.subscribe(`attack${name}`, (coordinates) => { receiveAttack(coordinates) });
+    pubsub.subscribe(`${name}AttackResults`, ([coordinates, result]) => { updateAttackBoard(coordinates, result) });
 
     function setEnemyName(enemy) {
         enemyName = enemy;
+    }
+
+    function updateAttackBoard(coordinates, result) {
+        attackSpaces.push(coordinates, result);
     }
 
     function sendAttack(coordinates) {
@@ -19,7 +27,21 @@ export function createPlayer(name) {
     }
 
     function receiveAttack(coordinates) {
-        gameBoard.receiveAttack(coordinates);
+        let result;
+        let space = occupied.findIndex(entry => entry[0].toString() === coordinates.toString());
+
+        if (space != -1) {
+            let ship = occupied[space][1];
+            ship.hit();
+            occupied.splice(space, 1);
+            if (ship.isSunk()) sunk++;
+            if (sunk === 5) console.log('All ships sunk :(');
+            result = true;
+        } else {
+            result = false;
+        }
+        defendSpaces.push(coordinates, result);
+        pubsub.publish(`${enemyName}AttackResults`, ([coordinates, result]));
     }
 
     function placeShips() {
@@ -41,54 +63,68 @@ export function createPlayer(name) {
             let index = Number(prompt(selectPrompt));
             index--;
             let endCoordinate = endCoordinates[index];
-            gameBoard.placeShip(ship, startCoordinate, endCoordinate);
+            placeShip(ship, startCoordinate, endCoordinate);
 
         });
 
     }
 
+    function placeShip(ship, startCoordinates, endCoordinates) {
+        let length = ship.getLength();
+        let i;
+        let j;
+        if (startCoordinates[0] === endCoordinates[0]) {
+            i = 0;
+            j = 1;
+        } else if (startCoordinates[1] === endCoordinates[1]) {
+            i = 1;
+            j = 0;
+        } else {
+            return false;
+        }
+        let diff = startCoordinates[j] - endCoordinates[j];
+        if (Math.abs(diff) === length - 1) {
+            while (diff != 0) {
+                let occupiedEntry = i === 0
+                    ? [[startCoordinates[i], startCoordinates[j] - diff], ship]
+                    : [[startCoordinates[j] - diff, startCoordinates[i]], ship];
+                occupied.push(occupiedEntry);
+                diff = diff > 0 ? diff - 1 : diff + 1;
+            }
+            occupied.push([startCoordinates, ship]);
+        } else {
+            return false;
+        }
+
+    }
+
     function isAlive() {
-        if (gameBoard.getSunk() < 5) {
+        if (sunk < 5) {
             return true;
         } else {
             return false;
         }
     }
 
+    function getSpaces() {
+        return { attackSpaces, defendSpaces };
+    }
+
     function getName() { return name; }
 
-    //function getBoard() {
-    //    return gameBoard; //temporary delete this later
-    //}
-
-
-    return { setEnemyName, sendAttack, placeShips, isAlive, getName }
+    return { setEnemyName, sendAttack, placeShips, isAlive, getName, getSpaces }
 
 
 }
 
 export function createCPUPlayer() {
-    let gameBoard = createGameBoard();
-    let enemyName = null;
-    let ships = [];
-    ships.push(createBattleship(5), createBattleship(4), createBattleship(3), createBattleship(3), createBattleship(2));
-
-    pubsub.subscribe(`attackCPU`, (coordinates) => { receiveAttack(coordinates) });
-
-
-    function setEnemyName(enemy) {
-        enemyName = enemy;
-    }
+    const cpuPlayer = createPlayer('CPU');
 
     function sendAttack() {
         let coordinateX = Math.floor(Math.random() * 10);
         let coordinateY = Math.floor(Math.random() * 10);
         let coordinates = [coordinateX, coordinateY];
         pubsub.publish(`attack${enemyName}`, (coordinates));
-    }
-
-    function receiveAttack(coordinates) {
-        gameBoard.receiveAttack(coordinates);
     }
 
     function placeShips() {
@@ -103,25 +139,13 @@ export function createCPUPlayer() {
 
             let endCoordinate = endCoordinates[Math.floor(Math.random() * endCoordinates.length)];
 
-            gameBoard.placeShip(ship, startCoordinate, endCoordinate);
+            cpuPlayer.placeShip(ship, startCoordinate, endCoordinate);
 
         });
 
     }
 
-    function isAlive() {
-        if (gameBoard.getSunk() < 5) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    //function getBoard() { return gameBoard; } //testing only delete laterrrrrrrr
-
-    function getName() { return 'CPU'; }
-
-    return { setEnemyName, sendAttack, placeShips, isAlive, getName }
+    return { ...cpuPlayer, sendAttack, placeShips }
 
 
 }
