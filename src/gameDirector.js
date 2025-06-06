@@ -23,13 +23,23 @@ export function createGameDirector() {
         //    inPlay = true;
     }
 
-    function receiveCoordinates(coordinates) {
-        if (inPlay && !gameOver) {
+    function receiveCoordinates(coordinates, commType) {
+        if (inPlay && !gameOver && commType === 'attack') {
             playRound(coordinates);
-        } else if (!inPlay && !gameOver) {
+        } else if (!inPlay && !gameOver && commType === 'defend') {
+            if (coordinates === 'cancel') {
+                shipCoords.pop();
+                return false;
+            }
             shipCoords.push(coordinates);
-            if (ships.length === 10) {
+            if ((shipCoords.length === 10 && player2.getName() === 'CPU')) {
                 player1.placeShips(shipCoords);
+                player2.placeShips();
+                inPlay = true;
+            } else if (shipCoords.length === 20 && !(player2.getName() === 'CPU')) {
+                player1.placeShips(shipCoords.slice(0, 10));
+                player2.placeShips(shipCoords.slice(10));
+                inPlay = true;
             }
         } else if (!inPlay && gameOver) {
             return `Game already ended. Refresh to start a new match`;
@@ -56,9 +66,9 @@ export function createGameDirector() {
         }
     }
 
-    function getInPlay() {
-        return inPlay;
+    function getGameState() {
+        return [inPlay, gameOver];
     }
 
-    return { init, playRound, getInPlay, receiveCoordinates };
+    return { init, playRound, getGameState, receiveCoordinates };
 }

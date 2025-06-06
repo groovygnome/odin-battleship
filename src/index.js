@@ -8,6 +8,7 @@ const dom = (() => {
     let defendBoard = document.createElement('div');
     defendBoard.className = 'board';
     let director = createGameDirector();
+    let shipLengths = [1, 2, 2, 3, 4, 1, 2, 2, 3, 4];
 
     let attackTiles = [];
     let defendTiles = [];
@@ -49,15 +50,35 @@ const dom = (() => {
             for (let j = 0; j < 10; j++) {
                 let attTile = document.createElement('button');
                 attTile.textContent = attackTiles[i][j];
-                attTile.id = j.toString() + i;
+                attTile.id = `att` + i.toString() + j;
                 attBoardRow.appendChild(attTile);
-                attTile.addEventListener('click', () => { console.log(attTile.textContent) });
+                attTile.addEventListener('click', () => {
+                    let gameState = director.getGameState();
+                    if (gameState[0] && !gameState[1]) {
+                        let coords = attTile.textContent.split(',').map((char) => Number(char));
+                        director.receiveCoordinates(coords, 'attack');
+                    }
+                });
 
                 let defTile = document.createElement('button');
                 defTile.textContent = defendTiles[i][j];
-                defTile.id = j.toString() + i;
+                defTile.id = `def` + i.toString() + j;
                 defBoardRow.appendChild(defTile);
-                defTile.addEventListener('click', () => { console.log(defTile.textContent) });
+                defTile.addEventListener('click', () => {
+                    let gameState = director.getGameState();
+                    if (!gameState[0] && !gameState[1]) {
+                        let coords = attTile.textContent.split(',').map((char) => Number(char));
+                        director.receiveCoordinates(coords, 'defend');
+                        if (defTile.style.backgroundColor == '') {
+                            let diff = shipLengths.pop();
+                            let endCoordinates = [[coords[0] - diff, coords[1]], [coords[0] + diff, coords[1]], [coords[0], coords[1] - diff], [coords[0], coords[1] + diff]];
+                            endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9)).map((entry) => entry.join(''));
+                            console.log(endCoordinates);
+                            endCoordinates.forEach((coord) => document.querySelector(`#def${coord}`).style.backgroundColor = 'green');
+                        }
+
+                    }
+                });
 
 
             }
@@ -67,6 +88,7 @@ const dom = (() => {
         boardsContainer.appendChild(attackBoard);
         boardsContainer.appendChild(defendBoard);
     }
+    init();
     displayBoard();
 })();
 

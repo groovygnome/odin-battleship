@@ -44,25 +44,22 @@ export function createPlayer(name) {
         pubsub.publish(`${enemyName}AttackResults`, ([coordinates, result]));
     }
 
-    function placeShips() {
+    function placeShips(shipCoords) {
         ships.forEach((ship) => {
-            let promptStart = `You are placing a ship of size ${ship.getLength()}.`
-            const startCoordinateX = Number(prompt(`${promptStart}\nEnter the X coordinate of the starting position.`));
-            const startCoordinateY = Number(prompt(`${promptStart}\nEnter the Y coordinate of the starting position.`));
-            let startCoordinate = [startCoordinateX, startCoordinateY];
-            let diff = ship.getLength() - 1;
+            let startCoordinate = shipCoords.shift();
+            //let diff = ship.getLength() - 1;
 
-            let endCoordinates = [[startCoordinateX - diff, startCoordinateY], [startCoordinateX + diff, startCoordinateY], [startCoordinateX, startCoordinateY - diff], [startCoordinateX, startCoordinateY + diff]];
-            endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9));
-            let selectPrompt = `Select from these coordinates, these are where your ship can be placed to.`;
-            let num = 1;
-            endCoordinates.forEach((coordinate) => {
-                selectPrompt += `\n${num} : ${coordinate}`;
-                num++;
-            });
-            let index = Number(prompt(selectPrompt));
-            index--;
-            let endCoordinate = endCoordinates[index];
+            //let endCoordinates = [[startCoordinateX - diff, startCoordinateY], [startCoordinateX + diff, startCoordinateY], [startCoordinateX, startCoordinateY - diff], [startCoordinateX, startCoordinateY + diff]];
+            //endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9));
+            //let selectPrompt = `Select from these coordinates, these are where your ship can be placed to.`;
+            //let num = 1;
+            //endCoordinates.forEach((coordinate) => {
+            //    selectPrompt += `\n${num} : ${coordinate}`;
+            //    num++;
+            //});
+            //let index = Number(prompt(selectPrompt));
+            //index--;
+            let endCoordinate = shipCoords.shift();
             placeShip(ship, startCoordinate, endCoordinate);
 
         });
@@ -112,13 +109,17 @@ export function createPlayer(name) {
 
     function getName() { return name; }
 
-    return { setEnemyName, sendAttack, placeShips, isAlive, getName, getSpaces }
+    function getShips() { return ships; }
+
+    return { setEnemyName, sendAttack, placeShips, isAlive, getName, getSpaces, getShips }
 
 
 }
 
 export function createCPUPlayer() {
     const cpuPlayer = createPlayer('CPU');
+    const ships = cpuPlayer.getShips();
+
 
     function sendAttack() {
         let coordinateX = Math.floor(Math.random() * 10);
