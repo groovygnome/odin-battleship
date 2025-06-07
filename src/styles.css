@@ -12,3 +12,15 @@ button{
 .board{
     margin-bottom: 10px;
 }
+
+.potential-endcoord{
+    background-color: green;
+}
+
+.start-coord, .occupied{
+    background-color: grey;
+}
+
+#attboard{
+    background-color: red;
+}

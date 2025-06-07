@@ -50,8 +50,8 @@ export function createGameDirector() {
         let currPlayer = roundCounter % 2 === 0 ? player1 : player2;
         currPlayer.sendAttack(coordinates);
         roundCounter++;
-        if (currPlayer === player1 && player2.getName == 'CPU') {
-            currPlayer.sendAttack();
+        if (player2.getName() == 'CPU') {
+            player2.sendAttack();
             roundCounter++;
         }
 

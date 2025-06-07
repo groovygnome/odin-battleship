@@ -5,10 +5,13 @@ const dom = (() => {
     let boardsContainer = document.querySelector('.board');
     let attackBoard = document.createElement('div');
     attackBoard.className = 'board';
+    attackBoard.id = 'attboard'
     let defendBoard = document.createElement('div');
     defendBoard.className = 'board';
+    defendBoard.id = 'defboard';
     let director = createGameDirector();
     let shipLengths = [1, 2, 2, 3, 4, 1, 2, 2, 3, 4];
+    let end = false;
 
     let attackTiles = [];
     let defendTiles = [];
@@ -68,13 +71,29 @@ const dom = (() => {
                     let gameState = director.getGameState();
                     if (!gameState[0] && !gameState[1]) {
                         let coords = attTile.textContent.split(',').map((char) => Number(char));
-                        director.receiveCoordinates(coords, 'defend');
-                        if (defTile.style.backgroundColor == '') {
+                        if (defTile.className == '' && !end) {
+                            defTile.className = 'start-coord';
+                            director.receiveCoordinates(coords, 'defend');
                             let diff = shipLengths.pop();
                             let endCoordinates = [[coords[0] - diff, coords[1]], [coords[0] + diff, coords[1]], [coords[0], coords[1] - diff], [coords[0], coords[1] + diff]];
                             endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9)).map((entry) => entry.join(''));
-                            console.log(endCoordinates);
-                            endCoordinates.forEach((coord) => document.querySelector(`#def${coord}`).style.backgroundColor = 'green');
+                            endCoordinates.forEach((coord) => document.querySelector(`#def${coord}`).className = 'potential-endcoord');
+                            end = true;
+                        } else if (defTile.className == 'potential-endcoord' && end) {
+                            director.receiveCoordinates(coords, 'defend');
+
+                            let endTiles = document.querySelector('#defboard').querySelectorAll('.potential-endcoord');
+                            endTiles.forEach((tile) => tile.className = '');
+
+                            let startTile = document.querySelector('.start-coord');
+                            let startCoords = startTile.textContent.split(',').map((char) => Number(char));
+
+                            let occupiedTiles = getTiles(startCoords, coords, 'def');
+                            occupiedTiles.forEach((tile) => tile.className = 'occupied');
+
+                            end = false;
+                        } else if (defTile.className == 'occupied') {
+                            alert('This space is already used');
                         }
 
                     }
@@ -88,6 +107,32 @@ const dom = (() => {
         boardsContainer.appendChild(attackBoard);
         boardsContainer.appendChild(defendBoard);
     }
+
+    function getTiles(startCoordinates, endCoordinates, prefix) {
+        let tiles = [];
+        let i;
+        let j;
+        if (startCoordinates[0] === endCoordinates[0]) {
+            i = 0;
+            j = 1;
+        } else if (startCoordinates[1] === endCoordinates[1]) {
+            i = 1;
+            j = 0;
+        } else {
+            return false;
+        }
+        let diff = startCoordinates[j] - endCoordinates[j];
+        while (diff != 0) {
+            let tile = i === 0
+                ? document.querySelector(`#${prefix}${startCoordinates[i]}${startCoordinates[j] - diff}`)
+                : document.querySelector(`#${prefix}${startCoordinates[j] - diff}${startCoordinates[i]}`);
+            tiles.push(tile);
+            diff = diff > 0 ? diff - 1 : diff + 1;
+        }
+        return tiles;
+    }
+
+
     init();
     displayBoard();
 })();

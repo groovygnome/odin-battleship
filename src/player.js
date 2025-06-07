@@ -40,6 +40,7 @@ export function createPlayer(name) {
         } else {
             result = false;
         }
+        console.log(result);
         defendSpaces.push(coordinates, result);
         pubsub.publish(`${enemyName}AttackResults`, ([coordinates, result]));
     }
@@ -111,7 +112,9 @@ export function createPlayer(name) {
 
     function getShips() { return ships; }
 
-    return { setEnemyName, sendAttack, placeShips, isAlive, getName, getSpaces, getShips }
+    function getEnemyName() { return enemyName; };
+
+    return { setEnemyName, getEnemyName, sendAttack, placeShips, isAlive, getName, getSpaces, getShips, placeShip }
 
 
 }
@@ -125,7 +128,7 @@ export function createCPUPlayer() {
         let coordinateX = Math.floor(Math.random() * 10);
         let coordinateY = Math.floor(Math.random() * 10);
         let coordinates = [coordinateX, coordinateY];
-        pubsub.publish(`attack${enemyName}`, (coordinates));
+        pubsub.publish(`attack${cpuPlayer.getEnemyName()}`, (coordinates));
     }
 
     function placeShips() {
@@ -139,6 +142,8 @@ export function createCPUPlayer() {
             endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9));
 
             let endCoordinate = endCoordinates[Math.floor(Math.random() * endCoordinates.length)];
+
+            console.log(`${startCoordinate} ${endCoordinate}`);
 
             cpuPlayer.placeShip(ship, startCoordinate, endCoordinate);
 
