@@ -12,6 +12,7 @@ const dom = (() => {
     let director = createGameDirector();
     let shipLengths = [1, 2, 2, 3, 4, 1, 2, 2, 3, 4];
     let end = false;
+    let roundCounter = 0;
 
     let attackTiles = [];
     let defendTiles = [];
@@ -40,7 +41,7 @@ const dom = (() => {
     }
 
 
-    const displayBoard = () => {
+    const displayBoard = (player = null) => {
         for (let i = 0; i <= 9; i++) {
             let attBoardRow = document.createElement('div');
             attBoardRow.className = 'row';
@@ -60,6 +61,9 @@ const dom = (() => {
                     if (gameState[0] && !gameState[1]) {
                         let coords = attTile.textContent.split(',').map((char) => Number(char));
                         director.receiveCoordinates(coords, 'attack');
+                        roundCounter % 2 == 0 ? displayBoard('1') : displayBoard('2');
+                        setTimeout(2000);
+                        roundCounter++;
                     }
                 });
 
@@ -67,45 +71,80 @@ const dom = (() => {
                 defTile.textContent = defendTiles[i][j];
                 defTile.id = `def` + i.toString() + j;
                 defBoardRow.appendChild(defTile);
-                defTile.addEventListener('click', () => {
-                    let gameState = director.getGameState();
-                    if (!gameState[0] && !gameState[1]) {
-                        let coords = attTile.textContent.split(',').map((char) => Number(char));
-                        if (defTile.className == '' && !end) {
-                            defTile.className = 'start-coord';
-                            director.receiveCoordinates(coords, 'defend');
-                            let diff = shipLengths.pop();
-                            let endCoordinates = [[coords[0] - diff, coords[1]], [coords[0] + diff, coords[1]], [coords[0], coords[1] - diff], [coords[0], coords[1] + diff]];
-                            endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9)).map((entry) => entry.join(''));
-                            endCoordinates.forEach((coord) => document.querySelector(`#def${coord}`).className = 'potential-endcoord');
-                            end = true;
-                        } else if (defTile.className == 'potential-endcoord' && end) {
-                            director.receiveCoordinates(coords, 'defend');
-
-                            let endTiles = document.querySelector('#defboard').querySelectorAll('.potential-endcoord');
-                            endTiles.forEach((tile) => tile.className = '');
-
-                            let startTile = document.querySelector('.start-coord');
-                            let startCoords = startTile.textContent.split(',').map((char) => Number(char));
-
-                            let occupiedTiles = getTiles(startCoords, coords, 'def');
-                            occupiedTiles.forEach((tile) => tile.className = 'occupied');
-
-                            end = false;
-                        } else if (defTile.className == 'occupied') {
-                            alert('This space is already used');
-                        }
-
-                    }
-                });
-
-
+                defTile.addEventListener('click', () => defTileLogic(defTile));
             }
             attackBoard.appendChild(attBoardRow);
             defendBoard.appendChild(defBoardRow);
         }
+        if (player) {
+            let spaces = director.getSpaces(player);
+            let attackSpaces = spaces[0];
+            let defendSpaces = spaces[1];
+            let occupied = spaces[2];
+
+            attackSpaces.forEach((space) => {
+                if (space[1]) {
+                    document.querySelector(`#att${space[0][0]}${space[0][1]}`).className = 'hit';
+                } else {
+                    document.querySelector(`#att${space[0][0]}${space[0][1]}`).className = 'miss';
+                }
+            });
+            occupied.forEach((space) => {
+                document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'occupied';
+            });
+            defendSpaces.forEach((space) => {
+                if (space[1]) {
+                    document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'hit';
+                } else {
+                    document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'miss';
+                }
+            });
+
+        }
         boardsContainer.appendChild(attackBoard);
         boardsContainer.appendChild(defendBoard);
+    }
+
+    function defTileLogic(defTile) {
+        let gameState = director.getGameState();
+        if (!gameState[0] && !gameState[1]) {
+            let coords = defTile.textContent.split(',').map((char) => Number(char));
+            if (defTile.className == '' && !end) {
+                defTile.className = 'start-coord';
+                director.receiveCoordinates(coords, 'defend');
+                let diff = shipLengths.pop();
+                let endCoordinates = [[coords[0] - diff, coords[1]], [coords[0] + diff, coords[1]], [coords[0], coords[1] - diff], [coords[0], coords[1] + diff]];
+                endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9));
+                endCoordinates = endCoordinates.filter((endCoordinate) => {
+                    let occupiedTiles = getTiles(coords, endCoordinate, 'def');
+                    if (occupiedTiles.every((tile) => tile.className != 'occupied')) {
+                        return true;
+                    }
+                });
+                endCoordinates = endCoordinates.map((entry => entry.join('')));
+                endCoordinates.forEach((coord) => document.querySelector(`#def${coord}`).className = 'potential-endcoord');
+                end = true;
+            } else if (defTile.className == 'potential-endcoord' && end) {
+                let startTile = document.querySelector('.start-coord');
+                let startCoords = startTile.textContent.split(',').map((char) => Number(char));
+
+                let occupiedTiles = getTiles(startCoords, coords, 'def');
+                director.receiveCoordinates(coords, 'defend');
+                occupiedTiles.forEach((tile) => tile.className = 'occupied');
+                startTile.className = 'occupied';
+
+                let endTiles = document.querySelector('#defboard').querySelectorAll('.potential-endcoord');
+                endTiles.forEach((tile) => tile.className = '');
+
+                end = false;
+            } else if (defTile.className == 'occupied' && !end) {
+                alert('This space is already used');
+            } else if (defTile.className == '.start-coord') {
+                director.receiveCoordinates('cancel', 'defend');
+                document.querySelector('.start-coord').className = '';
+            }
+
+        }
     }
 
     function getTiles(startCoordinates, endCoordinates, prefix) {

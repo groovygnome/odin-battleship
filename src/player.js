@@ -1,4 +1,4 @@
-import { createGameBoard } from './gameBoard.js'
+
 import { createBattleship } from './battleship.js'
 import { pubsub } from './pubsub.js'
 
@@ -105,7 +105,7 @@ export function createPlayer(name) {
     }
 
     function getSpaces() {
-        return { attackSpaces, defendSpaces };
+        return { attackSpaces, defendSpaces, occupied };
     }
 
     function getName() { return name; }

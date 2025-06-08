@@ -70,5 +70,13 @@ export function createGameDirector() {
         return [inPlay, gameOver];
     }
 
-    return { init, playRound, getGameState, receiveCoordinates };
+    function getSpaces(player) {
+        if (player == '1') {
+            return player1.getSpaces();
+        } else if (player == '2') {
+            return player2.getSpaces();
+        }
+    }
+
+    return { init, playRound, getGameState, receiveCoordinates, getSpaces };
 }

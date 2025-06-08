@@ -21,6 +21,10 @@ button{
     background-color: grey;
 }
 
-#attboard{
+.hit{
     background-color: red;
+}
+
+.miss{
+    background-color: black;
 }
