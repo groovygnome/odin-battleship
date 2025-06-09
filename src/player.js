@@ -19,7 +19,7 @@ export function createPlayer(name) {
     }
 
     function updateAttackBoard(coordinates, result) {
-        attackSpaces.push(coordinates, result);
+        attackSpaces.push([coordinates, result]);
     }
 
     function sendAttack(coordinates) {
@@ -41,7 +41,7 @@ export function createPlayer(name) {
             result = false;
         }
         console.log(result);
-        defendSpaces.push(coordinates, result);
+        defendSpaces.push([coordinates, result]);
         pubsub.publish(`${enemyName}AttackResults`, ([coordinates, result]));
     }
 

@@ -12,6 +12,7 @@ const dom = (() => {
     let director = createGameDirector();
     let shipLengths = [1, 2, 2, 3, 4, 1, 2, 2, 3, 4];
     let end = false;
+    let againstCPU = false;
     let roundCounter = 0;
 
     let attackTiles = [];
@@ -29,14 +30,15 @@ const dom = (() => {
 
     const init = () => {
         let name1 = prompt(`Hi! Please give a name for Player 1 :`);
-        let againstCPU = prompt(`Would you like to fight a CPU?`);
+        let fightCPU = prompt(`Would you like to fight a CPU?`);
         let name2;
-        if (againstCPU.toLowerCase() === 'yes') {
-            name2 = 'CPU'
+        if (fightCPU.toLowerCase() === 'yes') {
+            name2 = 'CPU';
+            againstCPU = true;
         } else {
             name2 = prompt(`Please give a name for Player 2 :`);
         }
-        director.init(name1, name2, againstCPU)
+        director.init(name1, name2, fightCPU)
         alert(`Now, you will place your ships`);
     }
 
@@ -61,9 +63,11 @@ const dom = (() => {
                     if (gameState[0] && !gameState[1]) {
                         let coords = attTile.textContent.split(',').map((char) => Number(char));
                         director.receiveCoordinates(coords, 'attack');
-                        roundCounter % 2 == 0 ? displayBoard('1') : displayBoard('2');
-                        setTimeout(2000);
+                        (roundCounter % 2 == 0) || (againstCPU) ? updateBoard('1') : updateBoard('2');
                         roundCounter++;
+                        if (!againstCPU) {
+                            setTimeout(() => { swapPlayerScreen(); }, 2000);
+                        }
                     }
                 });
 
@@ -76,33 +80,54 @@ const dom = (() => {
             attackBoard.appendChild(attBoardRow);
             defendBoard.appendChild(defBoardRow);
         }
-        if (player) {
-            let spaces = director.getSpaces(player);
-            let attackSpaces = spaces[0];
-            let defendSpaces = spaces[1];
-            let occupied = spaces[2];
-
-            attackSpaces.forEach((space) => {
-                if (space[1]) {
-                    document.querySelector(`#att${space[0][0]}${space[0][1]}`).className = 'hit';
-                } else {
-                    document.querySelector(`#att${space[0][0]}${space[0][1]}`).className = 'miss';
-                }
-            });
-            occupied.forEach((space) => {
-                document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'occupied';
-            });
-            defendSpaces.forEach((space) => {
-                if (space[1]) {
-                    document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'hit';
-                } else {
-                    document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'miss';
-                }
-            });
-
-        }
         boardsContainer.appendChild(attackBoard);
         boardsContainer.appendChild(defendBoard);
+    }
+
+    function updateBoard(player) {
+        let tiles = document.querySelectorAll('button[class]');
+        tiles.forEach((tile) => tile.removeAttribute('class'));
+        let spaces = director.getSpaces(player);
+        let attackSpaces = spaces.attackSpaces;
+        let defendSpaces = spaces.defendSpaces;
+        let occupied = spaces.occupied;
+
+        attackSpaces.forEach((space) => {
+            if (space[1]) {
+                document.querySelector(`#att${space[0][0]}${space[0][1]}`).className = 'hit';
+            } else {
+                document.querySelector(`#att${space[0][0]}${space[0][1]}`).className = 'miss';
+            }
+        });
+        occupied.forEach((space) => {
+            document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'occupied';
+        });
+        defendSpaces.forEach((space) => {
+            if (space[1]) {
+                document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'hit';
+            } else {
+                document.querySelector(`#def${space[0][0]}${space[0][1]}`).className = 'miss';
+            }
+        });
+    }
+
+    function swapPlayerScreen() {
+        let blackScreen = document.createElement('div');
+        blackScreen.className = '.black-screen';
+
+        let message = document.createElement('h1');
+        message.textContent = 'Swap players';
+        blackScreen.appendChild(message);
+
+        let closeButton = document.createElement('button');
+        closeButton.textContent = 'Close';
+        closeButton.addEventListener('click', () => {
+            (roundCounter % 2 == 0) || (againstCPU) ? updateBoard('1') : updateBoard('2');
+            document.body.removeChild(blackScreen)
+        });
+        blackScreen.appendChild(closeButton);
+
+        document.body.appendChild(blackScreen);
     }
 
     function defTileLogic(defTile) {
