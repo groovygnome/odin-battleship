@@ -7,6 +7,7 @@ export function createGameDirector() {
     let roundCounter = 0;
     let inPlay = false;
     let gameOver = false;
+    let winner = '';
 
     function init(name1, name2, againstCPU) {
         player1 = createPlayer(name1);
@@ -56,11 +57,11 @@ export function createGameDirector() {
         }
 
         if (!player1.isAlive()) {
-            console.log(`${player2.getName()} wins!`);
+            winner = player2.getName();
             gameOver = true;
             inPlay = false;
         } else if (!player2.isAlive()) {
-            console.log(`${player1.getName()} wins!`);
+            winner = player1.getName();
             gameOver = true;
             inPlay = false;
         }
@@ -70,13 +71,17 @@ export function createGameDirector() {
         return [inPlay, gameOver];
     }
 
-    function getSpaces(player) {
-        if (player == '1') {
+    function getSpaces(playerName) {
+        if (playerName == player1.getName()) {
             return player1.getSpaces();
-        } else if (player == '2') {
+        } else if (playerName == player2.getName()) {
             return player2.getSpaces();
         }
     }
 
-    return { init, playRound, getGameState, receiveCoordinates, getSpaces };
+    function getWinner() {
+        return winner;
+    }
+
+    return { init, playRound, getGameState, receiveCoordinates, getSpaces, getWinner };
 }

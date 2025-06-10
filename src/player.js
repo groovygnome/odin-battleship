@@ -122,13 +122,20 @@ export function createPlayer(name) {
 export function createCPUPlayer() {
     const cpuPlayer = createPlayer('CPU');
     const ships = cpuPlayer.getShips();
+    const hit = [];
 
 
     function sendAttack() {
-        let coordinateX = Math.floor(Math.random() * 10);
-        let coordinateY = Math.floor(Math.random() * 10);
-        let coordinates = [coordinateX, coordinateY];
-        pubsub.publish(`attack${cpuPlayer.getEnemyName()}`, (coordinates));
+        while (true) {
+            let coordinateX = Math.floor(Math.random() * 10);
+            let coordinateY = Math.floor(Math.random() * 10);
+            let coordinates = [coordinateX, coordinateY];
+            if (!hit.some(([x, y]) => x === coordinates[0] && y === coordinates[1])) {
+                pubsub.publish(`attack${cpuPlayer.getEnemyName()}`, (coordinates));
+                hit.push(coordinates);
+                return;
+            }
+        }
     }
 
     function placeShips() {
