@@ -68,6 +68,10 @@ button{
     flex-direction: column;
 }
 
-h1{
+.turn{
     color: white;
+}
+
+.victor{
+    color: black;
 }

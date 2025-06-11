@@ -60,24 +60,7 @@ const dom = (() => {
                 attTile.textContent = attackTiles[i][j];
                 attTile.id = `att` + i.toString() + j;
                 attBoardRow.appendChild(attTile);
-                attTile.addEventListener('click', () => {
-                    let gameState = director.getGameState();
-                    if (gameState[0] && !gameState[1] && attTile.className === '' && !waiting) {
-                        let coords = attTile.textContent.split(',').map((char) => Number(char));
-                        director.receiveCoordinates(coords, 'attack');
-                        (roundCounter % 2 == 0) || (againstCPU) ? updateBoard(name1) : updateBoard(name2);
-                        roundCounter++;
-                        if (!againstCPU) {
-                            waiting = true;
-                            setTimeout(() => { swapPlayerScreen(`${(roundCounter % 2 == 0) ? name1 : name2}'s turn. Swap Screens.`) }, 1500);
-                        }
-                    }
-                    gameState = director.getGameState();
-                    if (!gameState[0] && gameState[1]) {
-                        let winner = director.getWinner();
-                        victoryScreen(winner);
-                    }
-                });
+                attTile.addEventListener('click', () => attTileLogic(attTile));
 
                 let defTile = document.createElement('button');
                 defTile.textContent = defendTiles[i][j];
@@ -124,6 +107,7 @@ const dom = (() => {
         victoryScreen.className = 'victory-screen';
 
         let message = document.createElement('h1');
+        message.className = 'victor';
         message.textContent = `${text} is the winner!`;
         victoryScreen.appendChild(message);
 
@@ -136,6 +120,7 @@ const dom = (() => {
         blackScreen.className = 'black-screen';
 
         let message = document.createElement('h1');
+        message.className = 'turn';
         message.textContent = text;
         blackScreen.appendChild(message);
 
@@ -149,6 +134,26 @@ const dom = (() => {
 
         document.body.appendChild(blackScreen);
         waiting = false;
+    }
+
+    function attTileLogic(attTile) {
+        let gameState = director.getGameState();
+        if (gameState[0] && !gameState[1] && attTile.className === '' && !waiting) {
+            let coords = attTile.textContent.split(',').map((char) => Number(char));
+            director.receiveCoordinates(coords, 'attack');
+            (roundCounter % 2 == 0) || (againstCPU) ? updateBoard(name1) : updateBoard(name2);
+            roundCounter++;
+            if (!againstCPU) {
+                waiting = true;
+                setTimeout(() => { swapPlayerScreen(`${(roundCounter % 2 == 0) ? name1 : name2}'s turn. Swap Screens.`) }, 1500);
+            }
+        }
+        gameState = director.getGameState();
+        if (!gameState[0] && gameState[1]) {
+            let winner = director.getWinner();
+            victoryScreen(winner);
+        }
+
     }
 
     function defTileLogic(defTile) {

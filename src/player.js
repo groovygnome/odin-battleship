@@ -140,13 +140,36 @@ export function createCPUPlayer() {
 
     function placeShips() {
         ships.forEach((ship) => {
-            let coordinateX = Math.floor(Math.random() * 10);
-            let coordinateY = Math.floor(Math.random() * 10);
+            let occupied = cpuPlayer.getSpaces().occupied;
+            let coordinateX;
+            let coordinateY;
+            while (true) {
+                coordinateX = Math.floor(Math.random() * 10);
+                coordinateY = Math.floor(Math.random() * 10);
+                if (!occupied.some((entry) => entry[0][0] === coordinateX && entry[0][1] === coordinateY)) {
+                    break;
+                }
+            }
             let startCoordinate = [coordinateX, coordinateY];
             let diff = ship.getLength() - 1;
 
             let endCoordinates = [[coordinateX - diff, coordinateY], [coordinateX + diff, coordinateY], [coordinateX, coordinateY - diff], [coordinateX, coordinateY + diff]]
             endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9));
+            console.log(`endCoords before: ${endCoordinates}`);
+
+            endCoordinates = endCoordinates.filter((endCoordinate) => {
+                let occupiedCoords = checkCoords(startCoordinate, endCoordinate);
+                console.log(`occupiedCoords: ${occupiedCoords}`);
+                let result = occupiedCoords.every((coord) =>
+                    !occupied.some((occCoord) => {
+                        console.log(occCoord[0][0] === coord[0] && occCoord[0][1] === coord[1]);
+                        console.log(`${occCoord[0][0]} === ${coord[0]} && ${occCoord[0][1]} === ${coord[1]}`)
+                    }));
+                console.log(result);
+                return result;
+            });
+
+            console.log(`endCoordinates after: ${endCoordinates}`);
 
             let endCoordinate = endCoordinates[Math.floor(Math.random() * endCoordinates.length)];
 
@@ -156,6 +179,31 @@ export function createCPUPlayer() {
 
         });
 
+    }
+
+    function checkCoords(startCoordinates, endCoordinates) {
+        let coords = [];
+        let i;
+        let j;
+        if (startCoordinates[0] === endCoordinates[0]) {
+            i = 0;
+            j = 1;
+        } else if (startCoordinates[1] === endCoordinates[1]) {
+            i = 1;
+            j = 0;
+        } else {
+            return false;
+        }
+        let diff = startCoordinates[j] - endCoordinates[j];
+        while (diff != 0) {
+            let coord = i === 0
+                ? [[startCoordinates[i], startCoordinates[j] - diff]]
+                : [[startCoordinates[j] - diff, startCoordinates[i]]];
+            coords.push(coord);
+            diff = diff > 0 ? diff - 1 : diff + 1;
+        }
+        coords.push(startCoordinates);
+        return coords;
     }
 
     return { ...cpuPlayer, sendAttack, placeShips }
