@@ -40,7 +40,6 @@ export function createPlayer(name) {
         } else {
             result = false;
         }
-        console.log(result);
         defendSpaces.push([coordinates, result]);
         pubsub.publish(`${enemyName}AttackResults`, ([coordinates, result]));
     }
@@ -155,25 +154,20 @@ export function createCPUPlayer() {
 
             let endCoordinates = [[coordinateX - diff, coordinateY], [coordinateX + diff, coordinateY], [coordinateX, coordinateY - diff], [coordinateX, coordinateY + diff]]
             endCoordinates = endCoordinates.filter(endCoordinate => (endCoordinate[0] >= 0 && endCoordinate[0] <= 9 && endCoordinate[1] >= 0 && endCoordinate[1] <= 9));
-            console.log(`endCoords before: ${endCoordinates}`);
+
 
             endCoordinates = endCoordinates.filter((endCoordinate) => {
                 let occupiedCoords = checkCoords(startCoordinate, endCoordinate);
-                console.log(`occupiedCoords: ${occupiedCoords}`);
                 let result = occupiedCoords.every((coord) =>
                     !occupied.some((occCoord) => {
-                        console.log(occCoord[0][0] === coord[0] && occCoord[0][1] === coord[1]);
-                        console.log(`${occCoord[0][0]} === ${coord[0]} && ${occCoord[0][1]} === ${coord[1]}`)
+                        return (occCoord[0][0] === coord[0] && occCoord[0][1] === coord[1]);
                     }));
-                console.log(result);
                 return result;
             });
 
-            console.log(`endCoordinates after: ${endCoordinates}`);
+
 
             let endCoordinate = endCoordinates[Math.floor(Math.random() * endCoordinates.length)];
-
-            console.log(`${startCoordinate} ${endCoordinate}`);
 
             cpuPlayer.placeShip(ship, startCoordinate, endCoordinate);
 
@@ -197,8 +191,8 @@ export function createCPUPlayer() {
         let diff = startCoordinates[j] - endCoordinates[j];
         while (diff != 0) {
             let coord = i === 0
-                ? [[startCoordinates[i], startCoordinates[j] - diff]]
-                : [[startCoordinates[j] - diff, startCoordinates[i]]];
+                ? [startCoordinates[i], startCoordinates[j] - diff]
+                : [startCoordinates[j] - diff, startCoordinates[i]];
             coords.push(coord);
             diff = diff > 0 ? diff - 1 : diff + 1;
         }
